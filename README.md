@@ -125,6 +125,4 @@ Full instructions are in [docs/setup-guide.md](docs/setup-guide.md).
 
 **Ashif** · [GitHub](https://github.com/ashif204-dev) · Linkedin_[www.linkedin.com/in/ashif-hussain-532248314]_
 
-## License
 
-MIT. See [LICENSE](LICENSE).
