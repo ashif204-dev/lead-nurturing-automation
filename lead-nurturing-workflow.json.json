@@ -1,0 +1,394 @@
+{
+  "name": "Automating Lead Nurturing with No Code",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "documentId": {
+          "__rl": true,
+          "value": "1INoo6xNo0DhHGrP3-mtQeXqpXfc7n8WUHjZQ3BGck8M",
+          "mode": "list",
+          "cachedResultName": "Automating Lead Nurturing with No Code in n8n",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1INoo6xNo0DhHGrP3-mtQeXqpXfc7n8WUHjZQ3BGck8M/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 634783391,
+          "mode": "list",
+          "cachedResultName": "Form responses 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1INoo6xNo0DhHGrP3-mtQeXqpXfc7n8WUHjZQ3BGck8M/edit#gid=634783391"
+        },
+        "event": "rowAdded",
+        "options": {}
+      },
+      "id": "b5d66060-aa2f-44a5-9bad-df57bab593ae",
+      "name": "Google Sheets Trigger",
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "typeVersion": 1,
+      "position": [
+        -144,
+        -112
+      ],
+      "credentials": {
+        "googleSheetsTriggerOAuth2Api": {
+          "id": "ZH71zUWAr3t5HNSK",
+          "name": "Google Sheets Trigger account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1INoo6xNo0DhHGrP3-mtQeXqpXfc7n8WUHjZQ3BGck8M",
+          "mode": "list",
+          "cachedResultName": "Automating Lead Nurturing with No Code in n8n",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1INoo6xNo0DhHGrP3-mtQeXqpXfc7n8WUHjZQ3BGck8M/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 634783391,
+          "mode": "list",
+          "cachedResultName": "Form responses 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1INoo6xNo0DhHGrP3-mtQeXqpXfc7n8WUHjZQ3BGck8M/edit#gid=634783391"
+        },
+        "options": {}
+      },
+      "id": "853652a2-7c37-4ced-bf7b-543452099671",
+      "name": "Get row(s) in sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -144,
+        80
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "nzZmLvNqJhwUsnPo",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 1
+      },
+      "id": "25ff47f3-7f7f-4096-8966-9781ad2fc837",
+      "name": "Wait",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        80,
+        80
+      ],
+      "webhookId": "61a31c10-6984-4c11-b04c-7e00f3bb7e4f"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=New lead details:\nName: {{ $json[\"Name \"] }}\nEmail: {{ $json[\"Email \"] }}\nPhone: {{ $json[\"Phone \"] }}\nService: {{ $json[\"Service \"] }}\nPreferred contact time: {{ $json[\"Contact time \"] }}\nBudget: {{ $json[\"Budget \"] }}\nTimeline: {{ $json[\"Timeline \"] }}\nComments: {{ $json[\"Additional comments \"] }}",
+        "options": {
+          "systemMessage": "You are a lead nurturing assistant. Summarize the lead, rate how hot it is (hot/warm/cold) based on budget and timeline, and suggest the next follow-up action."
+        }
+      },
+      "id": "a81d74d6-63d3-41f0-9c46-c9f681c1b80a",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        304,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-5-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "id": "4fb98dd2-d293-45a6-bd1d-eb138ccae71a",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        176,
+        288
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": null,
+          "name": "",
+          "__aiGatewayManaged": true
+        }
+      },
+      "notes": "You are a lead qualification assistant. You will receive one lead's form answers.\n\nRules:\n- Do not repeat, rewrite, or change any form answers. The Slack message already shows them.\n- Only use these options for the lead's status: Hot, Warm, or Cold.\n- Use these timelines exactly as written: Immediate, 1 to 3 months, Later.\n- Use these services exactly as written: Basic Package, Standard Package, Premium Package.\n\nReturn only this, in plain text, with no headers or bullets:\n\nTemperature: [Hot, Warm, or Cold]\nSummary: [One sentence explaining why, based on timeline and budget.]\nNext step: [One short action, such as \"Call within 24 hours\" or \"Send Premium Package quote.\"]\n\nKeep the total under 60 words."
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C0CBTQJFSTX",
+          "mode": "list",
+          "cachedResultName": "all-ashh"
+        },
+        "text": "=Lead summary:\n{{ $json.output }}\n\nCheck the Google Sheet for more details:\nhttps://docs.google.com/spreadsheets/d/1INoo6xNo0DhHGrP3-mtQeXqpXfc7n8WUHjZQ3BGck8M/edit",
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.7,
+      "position": [
+        672,
+        80
+      ],
+      "id": "836b8294-94d7-4622-ae80-3ff220c155f8",
+      "name": "Send a message",
+      "webhookId": "7aac0335-137d-405b-8bcc-0d9e486bb340",
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "fDfs8CReIbcEdZL8",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1INoo6xNo0DhHGrP3-mtQeXqpXfc7n8WUHjZQ3BGck8M",
+          "mode": "list",
+          "cachedResultName": "Automating Lead Nurturing with No Code in n8n",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1INoo6xNo0DhHGrP3-mtQeXqpXfc7n8WUHjZQ3BGck8M/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 634783391,
+          "mode": "list",
+          "cachedResultName": "Form responses 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1INoo6xNo0DhHGrP3-mtQeXqpXfc7n8WUHjZQ3BGck8M/edit#gid=634783391"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Name ": "={{ $json.output }} was contacted by email  on {{ $now }}",
+            "Budget ": "={{ $json.output }}"
+          },
+          "matchingColumns": [
+            "Name "
+          ],
+          "schema": [
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Name ",
+              "displayName": "Name ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Email ",
+              "displayName": "Email ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Phone ",
+              "displayName": "Phone ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Service ",
+              "displayName": "Service ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Contact time ",
+              "displayName": "Contact time ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Budget ",
+              "displayName": "Budget ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Timeline ",
+              "displayName": "Timeline ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Additional comments ",
+              "displayName": "Additional comments ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        720,
+        288
+      ],
+      "id": "aa7232e6-547a-4856-b6aa-93505b5d0d24",
+      "name": "Update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "nzZmLvNqJhwUsnPo",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Google Sheets Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "versionId": "08fcb196-6ae6-4525-9f44-0ce8d2dede22",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "6570dcefe7637841b6de670888277973eb62728b2a2d4bcec0a3cadb4dfa092d"
+  },
+  "nodeGroups": [],
+  "id": "E8HFjIOkJtS4OYQG",
+  "tags": []
+}
